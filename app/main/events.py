@@ -2,6 +2,9 @@ from flask import session
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio
 
+from ..games import Player, Avalon
+from . import games_db
+
 
 @socketio.on('joined')
 def joined(message):
@@ -9,6 +12,7 @@ def joined(message):
     A status message is broadcast to all people in the room."""
     room = session.get('room')
     join_room(room)
+
     emit('status', {'msg': session.get('player_name') + ' has entered the room.'}, room=room)
 
 

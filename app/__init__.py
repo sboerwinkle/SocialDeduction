@@ -19,5 +19,8 @@ def create_app(debug=False):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
+    from .games.AvalonGame import avalon_bp
+    app.register_blueprint(avalon_bp)
+
     socketio.init_app(app)
     return app

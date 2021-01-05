@@ -1,6 +1,4 @@
 
-
-
 class Game():
 
     def __init__(self, room_id):
@@ -8,12 +6,15 @@ class Game():
         self.player_count = 0
 
         # id to name
-        self.players = {}
+        self.players = []
         self.host_player = None
 
-
-    def room_id(self):
-        return self.room_id
+    def add_player(self, player_id, player_name):
+        if self.player_count == 0:
+            self.host_player = (player_id, player_name)
+        
+        self.player_count += 1
+        self.players.append((player_id, player_name))
     
     def game_name(self):
         raise NotImplementedError
