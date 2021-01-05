@@ -8,11 +8,16 @@ from . import games_db
 
 @socketio.on('joined')
 def joined(message):
-    """Sent by clients when they enter a room.
-    A status message is broadcast to all people in the room."""
+    """Sent by clients when they enter a room"""
     room = session.get('room')
     join_room(room)
 
+    game = games_db.get_game(room)
+
+    # emit change in game state to javascript as well.
+
+
+    """A status message is broadcast to all people in the room."""
     emit('status', {'msg': session.get('player_name') + ' has entered the room.'}, room=room)
 
 

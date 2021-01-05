@@ -24,6 +24,10 @@ $(document).ready(function () {
             socket.emit('text', { msg: text });
         }
     });
+
+
+
+    
 });
 function leave_room() {
     socket.emit('left', {}, function () {

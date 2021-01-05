@@ -16,13 +16,7 @@
 <h1>{{ game_info["game_name"] }}: {{ game_info["room_id"] }}</h1>
 <h4>Debugging Info: {{ game_info["player_id"] }}, {{ game_info["player_name"] }}</h2>
 
-<body>
-    
-
-
-    
-</body>
-
+{% include "components/lobby.html" %}
 
 {% include "components/chat.html" %}
 </html>
