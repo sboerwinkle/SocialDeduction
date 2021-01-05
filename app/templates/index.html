@@ -1,0 +1,15 @@
+<html>
+
+<head>
+    <title>Choose a game</title>
+</head>
+
+<body>
+    <form method="post" action="/">
+        {% for game_name in games_list %}
+        <input type="submit" name={{game_name}} value={{game_name}}>
+        {% endfor %}
+    </form>
+</body>
+
+</html>
