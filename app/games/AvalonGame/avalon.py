@@ -7,19 +7,41 @@ from ... import socketio
 from ...main.forms import LoginForm, NameForm
 from ..game import Game
 
+"""
+    Avalon general planning.
+    Views needed:
+    1. Planning stage (Choose roles and rules to play with)
+    2. Night phase (everyone is assigned a role)
+    3. Quest Picking Phase (leader chooses a quest)
+    4. Quest Voting Phase (everyone votes on quest)
+    5. Quest P/F Phase (people on quest choose to pass or fail)
+    6. End of Game Voting Phase for assassin (somtimes)
+    7. End of Game Screen.
+"""
+
 class Avalon(Game):
 
     def __init__(self, room_id):
+        min_players = 2
         max_players = 10 
-        Game.__init__(self, room_id, max_players)
+        Game.__init__(self, room_id, min_players, max_players)
 
 
     def game_name(self):
         return "Avalon"
 
 
-from flask import session
+# socketIO events specific to avalon
+@socketio.on('Avalon_start')
+def avalon_start(message):
+    # role picker and rule picker.
+    pass
 
+
+
+
+# game route
+from flask import session
 @avalon_bp.route('/game/avalon/<room_id>',  methods=['GET', 'POST'])
 def game_room(room_id):
     if "player_id" not in session:

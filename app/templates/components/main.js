@@ -1,10 +1,36 @@
 // Jinja2 to Javascript. Oh the horror.
 var room_id = {{ game_info["room_id"] | tojson}};
+var game_name = {{ game_info["game_name"] | tojson}};
 var player_id = {{ game_info["player_id"] | tojson}};
 var player_name = {{ game_info["player_name"] | tojson}};
 var socket;
 
 var players;
+
+var list = function (players, show_ready) {
+    var player_list = document.getElementById('lobby-player-list');
+    player_list.innerHTML = ""
+    for (var i = 0; i < players.length; i++) {
+        var player_item = '<li>'
+        if (players[i].id == player_id) {
+            player_item += "(You) <b>" + players[i].name + "</b>"
+        } else {
+            player_item += players[i].name;
+        }
+        
+        if(show_ready){
+            player_item += " | ";
+            if (players[i].ready) {
+                player_item += 'Ready! '
+            } else {
+                player_item += 'Not Ready! '
+            }
+        }
+        
+        player_item += '</li>'
+        player_list.innerHTML += player_item;
+    }
+}
 
 $(document).ready(function () {
     socket = io.connect('http://localhost:5000');
@@ -27,38 +53,36 @@ $(document).ready(function () {
             // $('#chat').val($('#chat').val() + '<' + data.change.player + ' has changed ready state>\n');
         }
 
-
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
 
         // update list of players
         players = data.players;
-        var list = function (players) {
-            var player_list = document.getElementById('lobby-player-list');
-            player_list.innerHTML = ""
-            for (var i = 0; i < players.length; i++) {
-                var player_item = '<li>'
-                if (players[i].id == player_id) {
-                    player_item += "(You) <b>" + players[i].name + "</b>"
-                } else {
-                    player_item += players[i].name;
-                }
-                player_item += " | ";
-                if (players[i].ready) {
-                    player_item += 'Ready! '
-                } else {
-                    player_item += 'Not Ready! '
-                }
-                player_item += '</li>'
-                player_list.innerHTML += player_item;
-            }
-        }
-        list(players);
+        list(players, true);
 
     });
+
+    socket.on('game_start', function (data) {
+        $('#chat').val($('#chat').val() + "Everyone is Ready! Game has started!" + '\n');
+        $('#chat').scrollTop($('#chat')[0].scrollHeight);
+
+        // hide the ready button
+        var ready_button = document.getElementById("lobby-ready")
+        ready_button.style.display = "none"
+
+        // show lobby list without ready info.
+        list(players, false);
+
+        // now we emit the start to the specific game start and the game.js and events will take over.
+        socket.emit(game_name+'_start', {"room": room_id, "player_id": player_id, "player_name": player_name });
+
+    });
+
     socket.on('message', function (data) {
         $('#chat').val($('#chat').val() + data.msg + '\n');
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
     });
+
+    // on document changes.
     $('#text').keypress(function (e) {
         var code = e.keyCode || e.which;
         if (code == 13) {
@@ -73,14 +97,13 @@ $(document).ready(function () {
             var ready = false;
             if (this.checked) {
                 ready = true;
-                document.getElementById('lobby-ready-text').innerHTML = "Ready!" 
+                document.getElementById('lobby-ready-text').innerHTML = "Ready!"
             } else {
                 ready = false;
                 document.getElementById('lobby-ready-text').innerHTML = "Not Ready!"
             }
 
-            // TODO: emit ready change.
-            socket.emit('ready change', { "room": room_id, "player_id": player_id, "ready": ready })
+            socket.emit('ready_change', { "room": room_id, "player_id": player_id, "ready": ready })
         }
     );
 

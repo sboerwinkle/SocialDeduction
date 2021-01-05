@@ -20,9 +20,10 @@ class Player():
 
 class Game():
 
-    def __init__(self, room_id, max_players):
+    def __init__(self, room_id, min_players, max_players):
         self.room_id = room_id
         self.player_count = 0
+        self.min_players = min_players
         self.max_players = max_players
         self.started = False
         self.players = {}
@@ -55,8 +56,13 @@ class Game():
         if player_id not in self.players.keys():
             print("!!!!!!! ERROR !!!!! Cannot change ready state of player not in game.", file=sys.stderr)
             return
-        
         self.players[player_id].ready = ready
+
+    def everyone_ready(self):
+        for player in self.players.values():
+            if not player.ready:
+                return False
+        return self.player_count >= self.min_players
     
     def game_name(self):
         raise NotImplementedError

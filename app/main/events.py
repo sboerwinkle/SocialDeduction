@@ -44,24 +44,29 @@ def left(message):
     # emit change
     emit('player_change', out_dict, room=room)
 
-@socketio.on('ready change')
+@socketio.on('ready_change')
 def ready_change(message):
     room = message["room"]
     player_id = message["player_id"]
     ready = message["ready"]
 
+    # first emit ready change
     game = games_db.get_game(room)
     game.ready_change_player(player_id, ready)
-    games_db.save_game(game)
-
     out_dict = {
         "type" : "ready",
         "change": {'player': session.get('player_name'), "ready": ready},
         "players": game.get_players(is_dict=True)
     }
-
-    """A status message is broadcast to all people in the room."""
     emit('player_change', out_dict, room=room)
+
+    # we need to check if all players are ready, and we can start the game.
+    if ready and game.everyone_ready():
+        game.started = True
+        emit('game_start', {},room=room)
+        pass
+
+    games_db.save_game(game)
 
 
 
