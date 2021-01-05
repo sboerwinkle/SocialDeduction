@@ -43,13 +43,24 @@ def game_home(game_name):
                 print("######### Room not found.", flush=True)
                 # TODO: Visually tell user room was not found.
             else:
-                return redirect(url_for(game_name+'.game_room', room_id=session['room']))
+                game = games_db.get_game(form.room.data)
+                if game.player_count >= game.max_players:
+                    print("######### Room is full.")
+                    # TODO: Visual cue that room is full
+                elif game.started:
+                    print("######### Room has already started game.")
+                    # TODO: Visual cue that game is started
+                else:
+                    # join game.
+                    return redirect(url_for(game_name+'.game_room', room_id=session['room']))
         # create new game
         else:
             # generates new ID
             session['room'] = generate_room_id()
             while(games_db.get_game(session['room']) is not None):
                 session['room'] = generate_room_id()
+            
+            # call constructor
             game = eval(inv_games_dict[game_name])(session['room'])
             games_db.save_game(game)
             return redirect(url_for(game_name+'.game_room', room_id=session['room']))
