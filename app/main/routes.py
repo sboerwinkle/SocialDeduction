@@ -51,7 +51,6 @@ def game_home(game_name):
                     print("######### Room has already started game.")
                     # TODO: Visual cue that game is started
                 else:
-                    # join game.
                     return redirect(url_for(game_name+'.game_room', room_id=session['room']))
         # create new game
         else:

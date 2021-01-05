@@ -9,23 +9,25 @@ var players;
 $(document).ready(function () {
     socket = io.connect('http://localhost:5000');
     socket.on('connect', function () {
-        socket.emit('joined', {"room": room_id, "player_id": player_id, "player_name": player_name});
+        socket.emit('joined', { "room": room_id, "player_id": player_id, "player_name": player_name });
     });
     socket.on('player_change', function (data) {
         // deal with players joining.
         if (data.type == "add") {
-            // show player change in chat
             $('#chat').val($('#chat').val() + '<' + data.change.player + ' has entered the room.>\n');
         }
 
         // deal with players leaving.
         if (data.type == "leave") {
-            // show player change in chat
-            $('#chat').val($('#chat').val() + '<' + data.change.player + ' has left the room.>\n'); 
+            $('#chat').val($('#chat').val() + '<' + data.change.player + ' has left the room.>\n');
+        }
+
+        // ready change
+        if (data.type == "ready") {
+            // $('#chat').val($('#chat').val() + '<' + data.change.player + ' has changed ready state>\n');
         }
 
 
-        
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
 
         // update list of players
@@ -35,7 +37,7 @@ $(document).ready(function () {
             player_list.innerHTML = ""
             for (var i = 0; i < players.length; i++) {
                 var player_item = '<li>'
-                if(players[i].id == player_id){
+                if (players[i].id == player_id) {
                     player_item += "(You) <b>" + players[i].name + "</b>"
                 } else {
                     player_item += players[i].name;
@@ -62,16 +64,31 @@ $(document).ready(function () {
         if (code == 13) {
             text = $('#text').val();
             $('#text').val('');
-            socket.emit('text', { msg: text, "room": room_id, "player_id": player_id, "player_name": player_name});
+            socket.emit('text', { msg: text, "room": room_id, "player_id": player_id, "player_name": player_name });
         }
     });
 
+    $('#lobby-ready-button').change(
+        function () {
+            var ready = false;
+            if (this.checked) {
+                ready = true;
+                document.getElementById('lobby-ready-text').innerHTML = "Ready!" 
+            } else {
+                ready = false;
+                document.getElementById('lobby-ready-text').innerHTML = "Not Ready!"
+            }
+
+            // TODO: emit ready change.
+            socket.emit('ready change', { "room": room_id, "player_id": player_id, "ready": ready })
+        }
+    );
 
 
 
 });
 function leave_room() {
-    socket.emit('left', {"room": room_id, "player_id": player_id, "player_name": player_name}, function () {
+    socket.emit('left', { "room": room_id, "player_id": player_id, "player_name": player_name }, function () {
         socket.disconnect();
 
         // go back to the login page

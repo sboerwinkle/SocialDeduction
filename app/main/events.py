@@ -12,30 +12,17 @@ def joined(message):
     room = message["room"]
     join_room(room)
 
-
     # add player to game
     game = games_db.get_game(room)
     game.add_player(session.get("player_id"), session.get("player_name"))
     games_db.save_game(game)
-
     out_dict = {
         "type" : "add",
         "change": {'player': session.get('player_name')},
         "players": game.get_players(is_dict=True)
     }
-
-    """A status message is broadcast to all people in the room."""
+    # Emit change
     emit('player_change', out_dict, room=room)
-
-
-@socketio.on('text')
-def text(message):
-    """Sent by a client when the user entered a new message.
-    The message is sent to all people in the room."""
-    room = message["room"]
-    player = message["player_name"]
-    emit('message', {'msg': player + ':' + message['msg']}, room=room)
-
 
 @socketio.on('left')
 def left(message):
@@ -49,11 +36,42 @@ def left(message):
     game.remove_player(session.get("player_id"), session.get("player_name"))
     games_db.save_game(game)
     leave_room(room)
-
     out_dict = {
         "type" : "leave",
-        "change": {'player': session.get('player_name')},
+        "change": {'player': player},
         "players": game.get_players(is_dict=True)
     }
-    
+    # emit change
     emit('player_change', out_dict, room=room)
+
+@socketio.on('ready change')
+def ready_change(message):
+    room = message["room"]
+    player_id = message["player_id"]
+    ready = message["ready"]
+
+    game = games_db.get_game(room)
+    game.ready_change_player(player_id, ready)
+    games_db.save_game(game)
+
+    out_dict = {
+        "type" : "ready",
+        "change": {'player': session.get('player_name'), "ready": ready},
+        "players": game.get_players(is_dict=True)
+    }
+
+    """A status message is broadcast to all people in the room."""
+    emit('player_change', out_dict, room=room)
+
+
+
+
+
+
+@socketio.on('text')
+def text(message):
+    """Sent by a client when the user entered a new message.
+    The message is sent to all people in the room."""
+    room = message["room"]
+    player = message["player_name"]
+    emit('message', {'msg': player + ': ' + message['msg']}, room=room)

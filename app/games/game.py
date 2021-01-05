@@ -49,8 +49,14 @@ class Game():
     def get_players(self, is_dict=False):
         if(is_dict):
             return [x.to_dict() for x in self.players.values()]
-
         return self.players.values()
+
+    def ready_change_player(self, player_id, ready):
+        if player_id not in self.players.keys():
+            print("!!!!!!! ERROR !!!!! Cannot change ready state of player not in game.", file=sys.stderr)
+            return
+        
+        self.players[player_id].ready = ready
     
     def game_name(self):
         raise NotImplementedError
