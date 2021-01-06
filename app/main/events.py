@@ -69,7 +69,7 @@ def ready_change(message):
     if ready and game.everyone_ready():
         game.started = True
         game.reset_ready()
-        emit('game_start', {}, room=room)
+        emit('game_start', {"host" : game.host_player}, room=room)
         pass
 
     games_db.save_game(game)

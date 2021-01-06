@@ -1,6 +1,7 @@
 from flask import redirect, render_template, request, session, url_for, flash
 from flask_socketio import emit
 import uuid
+import random
 
 from . import avalon_bp
 from .avalon_roles import get_roles
@@ -47,19 +48,71 @@ class Avalon(Game):
             9: [6, 3],
             10:[6, 4]
         }
+        
+        # each quest in order
+        # tuple of (number of people, how many needed to fail.)
+        self.quest_balance = {
+            5 : [(2, 1), (3, 1), (2, 1), (3, 1), (3, 1)],
+            6 : [(2, 1), (3, 1), (4, 1), (3, 1), (4, 1)],
+            7 : [(2, 1), (3, 1), (3, 1), (4, 2), (4, 1)],
+            8 : [(3, 1), (4, 1), (4, 1), (5, 2), (5, 1)],
+            9 : [(3, 1), (4, 1), (4, 1), (5, 2), (5, 1)],
+            10: [(3, 1), (4, 1), (4, 1), (5, 2), (5, 1)],
+        }
 
         # TODO: perhaps also include role description with the role?
         # returns roles in {name: {Name:, Team:, Number:, Knowledge:}}
         self.roles = get_roles("app/games/AvalonGame/avalon_roles.csv")
-        
-
         self.rules = {
             "Vote Rule": False,
-            "Targetting": False,
+            # "Targetting": False,
+            # "Good Can Fail" : False,
+            # "Custom Quests": False,
         }
+
+        # game variables that need to be reset each game.
+        self.active_roles = []
+        self.assigned_roles = {} # user: role
+
+        self.player_order = []
+        self.leader = "" # UID
+
+        """
+            quests -> a single value() from quest_balance.
+            quest_outcomes -> list of nums. 0=not done, 1=Good, -1 = Evil
+        """
+        self.quest_tracker = {}
+
+        self.vote_tracker = {}
         
 
+    def setup_game(self, roles):
+        self.active_roles = roles
+        # Sets up quests tracking.
+        self.quest_tracker = {
+            "quests" : self.quest_balance[self.player_count],
+            "quest_outcomes" : [0, 0, 0, 0, 0], # 1 = GOOD, -1 = EVIL
+        }
+        # Sets up vote tracking
+        self.vote_tracker = {
+            'round' : 1,
+            1 : [],
+            2 : [],
+            3 : [],
+            4 : [],
+            5 : [],
+        }
 
+
+        # Shuffles roles.
+        random.shuffle(roles)
+        # TODO: perhaps also shuffle player order?
+        self.player_order = list(self.players.keys())
+        self.assigned_roles = {self.player_order[i]: roles[i] for i in range(len(roles))}
+
+        # Chooses leader
+        leader_int = random.randint(0, self.player_count-1)
+        self.leader = self.player_order[leader_int]
 
     def game_name(self):
         return "Avalon"
@@ -69,7 +122,7 @@ class Avalon(Game):
 """
     message: 
         scene : int. Indicates which scene the player is coming from.
-        room: str. The room ID
+        room: str. The room IDs
 
     This function transitions from the common lobby (scene 0)
     to the role/rule picking (scene 1)
@@ -92,7 +145,13 @@ def v1_select_change(message):
 @socketio.on("v1_finish")
 def v1_finish(message):
     room = message["room"]
-    print(message['roles'], flush=True)
+    roles = message['roles']
+    
+    # assign the roles
+    game = games_db.get_game(room)
+    game.setup_game(roles)
+    games_db.save_game(game)
+
 
 # game route
 from flask import session

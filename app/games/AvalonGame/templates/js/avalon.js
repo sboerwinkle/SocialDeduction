@@ -30,7 +30,9 @@ $(document).ready(function () {
         list(players, false);
 
         // now we emit the start to the specific game start and the game.js and events will take over.
-        socket.emit(game_name + '_ready', { "room": room_id });
+        if (data.host == player_id) {
+            socket.emit(game_name + '_ready', { "room": room_id });
+        }
     });
 
 
@@ -93,16 +95,16 @@ $(document).ready(function () {
 
 
 // view 1 submit
-function finish_planning(){
+function finish_planning() {
 
     // grab roles
     var checked_boxes = $('#role-picker :checked');
 
     // basic check -> correct amount
-    if(checked_boxes.length < (balance[0]+balance[1])){
+    if (checked_boxes.length < (balance[0] + balance[1])) {
         alert("You do not have enough characters selected!");
         return;
-    } else if(checked_boxes.length > (balance[0]+balance[1])){
+    } else if (checked_boxes.length > (balance[0] + balance[1])) {
         alert("Yo have too many characters selected!");
         return;
     }
@@ -110,33 +112,33 @@ function finish_planning(){
     var roles = [];
     var num_good = 0;
     var num_evil = 0;
-    for(var i = 0; i < checked_boxes.length; i++){
+    for (var i = 0; i < checked_boxes.length; i++) {
         var name = checked_boxes[i].name;
         roles.push(name)
 
-        if(roles_list[name].Team == "Good"){
-            num_good ++;
+        if (roles_list[name].Team == "Good") {
+            num_good++;
         } else {
-            num_evil ++;
+            num_evil++;
         }
     }
 
     // medium check -> must have at least 1 good or 1 evil
-    if(num_good == 0){
+    if (num_good == 0) {
         alert("You must have at least 1 good character!");
         return;
     }
-    else if(num_evil == 0){
+    else if (num_evil == 0) {
         alert("You must have at least 1 evil character!");
         return;
     }
 
     // final check -> match guidelines
-    if(num_good != balance[0] || num_evil != balance[1]){
+    if (num_good != balance[0] || num_evil != balance[1]) {
         alert("Your good/evil ratio does not match the expected ratio.");
         return;
     }
 
     // emit info to server now.
-    socket.emit("v1_finish", {room:room_id, roles:roles});
+    socket.emit("v1_finish", { room: room_id, roles: roles });
 }
