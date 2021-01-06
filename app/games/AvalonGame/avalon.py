@@ -52,6 +52,8 @@ class Avalon(Game):
         # each quest in order
         # tuple of (number of people, how many needed to fail.)
         self.quest_balance = {
+            2 : [(1,1),(1,1),(1,1),(1,1),(1,1)],
+
             5 : [(2, 1), (3, 1), (2, 1), (3, 1), (3, 1)],
             6 : [(2, 1), (3, 1), (4, 1), (3, 1), (4, 1)],
             7 : [(2, 1), (3, 1), (3, 1), (4, 2), (4, 1)],
@@ -61,8 +63,9 @@ class Avalon(Game):
         }
 
         # TODO: perhaps also include role description with the role?
-        # returns roles in {name: {Name:, Team:, Number:, Knowledge:}}
-        self.roles = get_roles("app/games/AvalonGame/avalon_roles.csv")
+        # returns roles in {name: {Name:, Team:, Number:}}
+        # self.roles = get_roles("app/games/AvalonGame/avalon_roles.csv")
+        self.roles = get_roles()
         self.rules = {
             "Vote Rule": False,
             # "Targetting": False,
@@ -84,7 +87,7 @@ class Avalon(Game):
         self.quest_tracker = {}
 
         self.vote_tracker = {}
-        
+
 
     def setup_game(self, roles):
         self.active_roles = roles
@@ -113,6 +116,7 @@ class Avalon(Game):
         # Chooses leader
         leader_int = random.randint(0, self.player_count-1)
         self.leader = self.player_order[leader_int]
+        # self.vote_tracker[self.vote_tracker['round']].append()
 
     def game_name(self):
         return "Avalon"
@@ -151,6 +155,10 @@ def v1_finish(message):
     game = games_db.get_game(room)
     game.setup_game(roles)
     games_db.save_game(game)
+
+    # emit the move to view 2
+    emit('v2_night', {"assigned_roles" : game.assigned_roles}, room=room)
+
 
 
 # game route
