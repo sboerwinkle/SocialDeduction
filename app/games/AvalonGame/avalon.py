@@ -85,10 +85,14 @@ def avalon_ready(message):
     emit('game_planning', {"roles": game.roles, "balance": balance}, room=room)
 
 @socketio.on("v1_select_change")
-def role_select_change(message):
+def v1_select_change(message):
     room = message["room"]
     emit('v1_select_change', message, room=room)
 
+@socketio.on("v1_finish")
+def v1_finish(message):
+    room = message["room"]
+    print(message['roles'], flush=True)
 
 # game route
 from flask import session

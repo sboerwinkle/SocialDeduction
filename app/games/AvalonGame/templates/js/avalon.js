@@ -114,7 +114,7 @@ function finish_planning(){
         var name = checked_boxes[i].name;
         roles.push(name)
 
-        if(roles_list[name].team == "Good"){
+        if(roles_list[name].Team == "Good"){
             num_good ++;
         } else {
             num_evil ++;
@@ -138,4 +138,5 @@ function finish_planning(){
     }
 
     // emit info to server now.
+    socket.emit("v1_finish", {room:room_id, roles:roles});
 }
