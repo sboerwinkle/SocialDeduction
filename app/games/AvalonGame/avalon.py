@@ -3,11 +3,11 @@ from flask_socketio import emit
 import uuid
 
 from . import avalon_bp
+from .avalon_roles import get_roles
 from ... import socketio
 from ...main.forms import LoginForm, NameForm
 from ...main import games_db
 from ..game import Game
-import csv
 
 """
     Avalon general planning.
@@ -33,7 +33,7 @@ import csv
 class Avalon(Game):
 
     def __init__(self, room_id):
-        min_players = 2
+        min_players = 2 # currently at 2 just for testing. Real min is 5
         max_players = 10 
         Game.__init__(self, room_id, min_players, max_players)
 
@@ -47,6 +47,11 @@ class Avalon(Game):
             10:[6, 4]
         }
 
+        self.roles = get_roles("app/games/AvalonGame/avalon_roles.csv")
+        self.rules = {
+            "Vote Rule": False,
+            "Targetting": False,
+        }
         
 
 
@@ -71,7 +76,9 @@ def avalon_ready(message):
     # move
     game = games_db.get_game(room)
     
-    
+    # TODO: Rule selection
+    emit('game_planning', {"roles": game.roles.values()}, room=room)
+
     
     
     

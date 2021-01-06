@@ -17,8 +17,13 @@
 <h4>Debugging Info: {{ game_info["player_id"] }}, {{ game_info["player_name"] }}</h2>
 
 {% include "components/lobby.html" %}
+<br>
+<br>
 
-<br><br>
+<!-- All the game views go here. -->
+{% include "view_planning.html" %}
 
+<br>
+<br>
 {% include "components/chat.html" %}
 </html>

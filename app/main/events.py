@@ -17,12 +17,13 @@ def joined(message):
     game.add_player(session.get("player_id"), session.get("player_name"))
     games_db.save_game(game)
     out_dict = {
-        "type" : "add",
+        "type": "add",
         "change": {'player': session.get('player_name')},
         "players": game.get_players(is_dict=True)
     }
     # Emit change
     emit('player_change', out_dict, room=room)
+
 
 @socketio.on('left')
 def left(message):
@@ -37,12 +38,13 @@ def left(message):
     games_db.save_game(game)
     leave_room(room)
     out_dict = {
-        "type" : "leave",
+        "type": "leave",
         "change": {'player': player},
         "players": game.get_players(is_dict=True)
     }
     # emit change
     emit('player_change', out_dict, room=room)
+
 
 @socketio.on('ready_change')
 def ready_change(message):
@@ -54,7 +56,7 @@ def ready_change(message):
     game = games_db.get_game(room)
     game.ready_change_player(player_id, ready)
     out_dict = {
-        "type" : "ready",
+        "type": "ready",
         "change": {'player': session.get('player_name'), "ready": ready},
         "players": game.get_players(is_dict=True)
     }
@@ -64,14 +66,10 @@ def ready_change(message):
     if ready and game.everyone_ready():
         game.started = True
         game.reset_ready()
-        emit('game_start', {},room=room)
+        emit('game_start', {}, room=room)
         pass
 
     games_db.save_game(game)
-
-
-
-
 
 
 @socketio.on('text')
