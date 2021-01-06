@@ -12,8 +12,8 @@ def get_roles(filename="avalon_roles.csv"):
             role_info = {
                 "Name": row[0],
                 "Team": row[1],
-                "Number": row[2],
-                "Knoweldge": row[3]
+                "Number": int(row[2]),
+                "Knowledge": row[3]
             }
             
             roles[row[0]] = role_info

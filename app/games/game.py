@@ -66,8 +66,8 @@ class Game():
         return self.player_count >= self.min_players
 
     def reset_ready(self):
-        for player in player.values():
-            player["ready"] = False
+        for player in self.players.values():
+            player.ready = False
     
     def game_name(self):
         raise NotImplementedError

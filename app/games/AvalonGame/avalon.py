@@ -47,7 +47,11 @@ class Avalon(Game):
             10:[6, 4]
         }
 
+        # TODO: perhaps also include role description with the role?
+        # returns roles in {name: {Name:, Team:, Number:, Knowledge:}}
         self.roles = get_roles("app/games/AvalonGame/avalon_roles.csv")
+        
+
         self.rules = {
             "Vote Rule": False,
             "Targetting": False,
@@ -73,11 +77,20 @@ class Avalon(Game):
 def avalon_ready(message):
     room = message["room"]
 
-    # move
     game = games_db.get_game(room)
     
     # TODO: Rule selection
-    emit('game_planning', {"roles": game.roles.values()}, room=room)
+    roles = list(game.roles.values())
+    emit('game_planning', {"roles": roles}, room=room)
+
+@socketio.on("v1_select_change")
+def role_select_change(message):
+    room = message["room"]
+    select_type = message["type"]
+    print("11111111111111111111111111111111 test", flush=True)
+
+    emit('v1_select_change', message, room=room)
+
 
     
     

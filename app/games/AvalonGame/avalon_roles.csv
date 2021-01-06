@@ -1,9 +1,9 @@
 Name,Team,Number,Knowledge
-Loyal Servant of Arthur,Good,4,NONE
 Merlin,Good,1,Evil
 Percival,Good,1,"Merlin,Morgana"
-Minion of Mordred,Evil,3,Evil
+Loyal Servant of Arthur,Good,4,NONE
 Mordred,Evil,1,Evil
 Morgana,Evil,1,Evil
 Assassin,Evil,1,Evil
 Oberon,Evil*,1,NONE
+Minion of Mordred,Evil,3,Evil

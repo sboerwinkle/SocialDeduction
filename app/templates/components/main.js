@@ -17,8 +17,8 @@ var list = function (players, show_ready) {
         } else {
             player_item += players[i].name;
         }
-        
-        if(show_ready){
+
+        if (show_ready) {
             player_item += " | ";
             if (players[i].ready) {
                 player_item += 'Ready! '
@@ -26,7 +26,7 @@ var list = function (players, show_ready) {
                 player_item += 'Not Ready! '
             }
         }
-        
+
         player_item += '</li>'
         player_list.innerHTML += player_item;
     }
@@ -76,20 +76,17 @@ $(document).ready(function () {
         }
     });
 
-    $('#lobby-ready-button').change(
-        function () {
-            var ready = false;
-            if (this.checked) {
-                ready = true;
-                document.getElementById('lobby-ready-text').innerHTML = "Ready!"
-            } else {
-                ready = false;
-                document.getElementById('lobby-ready-text').innerHTML = "Not Ready!"
-            }
-
-            socket.emit('ready_change', { "room": room_id, "player_id": player_id, "ready": ready })
+    $('#lobby-ready-button').change(function () {
+        var ready = false;
+        if (this.checked) {
+            ready = true;
+            document.getElementById('lobby-ready-text').innerHTML = "Ready!"
+        } else {
+            ready = false;
+            document.getElementById('lobby-ready-text').innerHTML = "Not Ready!"
         }
-    );
+        socket.emit('ready_change', { "room": room_id, "player_id": player_id, "ready": ready })
+    });
 
 
 
