@@ -32,6 +32,8 @@ class Game():
     def add_player(self, player_id, player_name, ready=False):
         if self.player_count == 0:
             self.host_player = (player_id, player_name)
+        if player_id in self.players.keys():
+            return
         
         self.player_count += 1
         self.players[player_id] = Player(player_id, player_name, ready)

@@ -54,6 +54,9 @@ def ready_change(message):
 
     # first emit ready change
     game = games_db.get_game(room)
+
+    # short circuit to prevent multiple requests
+
     game.ready_change_player(player_id, ready)
     out_dict = {
         "type": "ready",

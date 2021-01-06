@@ -39,6 +39,7 @@ class Avalon(Game):
 
         # balance of good,bad for <key> num players
         self.team_balance = {
+            2: [1, 1],
             5: [3, 2],
             6: [4, 2],
             7: [4, 3],
@@ -80,23 +81,13 @@ def avalon_ready(message):
     game = games_db.get_game(room)
     
     # TODO: Rule selection
-    roles = list(game.roles.values())
-    emit('game_planning', {"roles": roles}, room=room)
+    balance = game.team_balance[game.player_count]
+    emit('game_planning', {"roles": game.roles, "balance": balance}, room=room)
 
 @socketio.on("v1_select_change")
 def role_select_change(message):
     room = message["room"]
-    select_type = message["type"]
-    print("11111111111111111111111111111111 test", flush=True)
-
     emit('v1_select_change', message, room=room)
-
-
-    
-    
-    
-
-
 
 
 # game route
