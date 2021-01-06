@@ -46,6 +46,7 @@ class Game():
 
         self.player_count-=1
         del self.players[player_id]
+    
 
     def get_players(self, is_dict=False):
         if(is_dict):
@@ -63,6 +64,10 @@ class Game():
             if not player.ready:
                 return False
         return self.player_count >= self.min_players
+
+    def reset_ready(self):
+        for player in player.values():
+            player["ready"] = False
     
     def game_name(self):
         raise NotImplementedError

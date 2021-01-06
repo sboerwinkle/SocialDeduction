@@ -61,22 +61,6 @@ $(document).ready(function () {
 
     });
 
-    socket.on('game_start', function (data) {
-        $('#chat').val($('#chat').val() + "Everyone is Ready! Game has started!" + '\n');
-        $('#chat').scrollTop($('#chat')[0].scrollHeight);
-
-        // hide the ready button
-        var ready_button = document.getElementById("lobby-ready")
-        ready_button.style.display = "none"
-
-        // show lobby list without ready info.
-        list(players, false);
-
-        // now we emit the start to the specific game start and the game.js and events will take over.
-        socket.emit(game_name+'_start', {"room": room_id, "player_id": player_id, "player_name": player_name });
-
-    });
-
     socket.on('message', function (data) {
         $('#chat').val($('#chat').val() + data.msg + '\n');
         $('#chat').scrollTop($('#chat')[0].scrollHeight);

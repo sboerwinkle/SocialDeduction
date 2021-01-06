@@ -5,19 +5,30 @@ import uuid
 from . import avalon_bp
 from ... import socketio
 from ...main.forms import LoginForm, NameForm
+from ...main import games_db
 from ..game import Game
+import csv
 
 """
     Avalon general planning.
     Views needed:
-    1. Planning stage (Choose roles and rules to play with)
-    2. Night phase (everyone is assigned a role)
-    3. Quest Picking Phase (leader chooses a quest)
-    4. Quest Voting Phase (everyone votes on quest)
-    5. Quest P/F Phase (people on quest choose to pass or fail)
-    6. End of Game Voting Phase for assassin (somtimes)
-    7. End of Game Screen.
+        0. Lobby (shared between all games)
+        1. Planning stage (Choose roles and rules to play with)
+        2. Night phase (everyone is assigned a role)
+        3. Quest Picking Phase (leader chooses a quest)
+        4. Quest Voting Phase (everyone votes on quest)
+        5. Quest P/F Phase (people on quest choose to pass or fail)
+        6. End of Game Voting Phase for assassin (somtimes)
+        7. End of Game Screen.
+
+
+    Roles have this info:
+        Name
+        Team (evil/good)
+        Number (ie number available)
+        Knowledge -> what other roles can they see.
 """
+
 
 class Avalon(Game):
 
@@ -26,16 +37,44 @@ class Avalon(Game):
         max_players = 10 
         Game.__init__(self, room_id, min_players, max_players)
 
+        # balance of good,bad for <key> num players
+        self.team_balance = {
+            5: [3, 2],
+            6: [4, 2],
+            7: [4, 3],
+            8: [5, 3],
+            9: [6, 3],
+            10:[6, 4]
+        }
+
+        
+
+
 
     def game_name(self):
         return "Avalon"
 
 
 # socketIO events specific to avalon
-@socketio.on('Avalon_start')
-def avalon_start(message):
-    # role picker and rule picker.
-    pass
+"""
+    message: 
+        scene : int. Indicates which scene the player is coming from.
+        room: str. The room ID
+
+    This function transitions from the common lobby (scene 0)
+    to the role/rule picking (scene 1)
+"""
+@socketio.on('Avalon_ready')
+def avalon_ready(message):
+    room = message["room"]
+
+    # move
+    game = games_db.get_game(room)
+    
+    
+    
+    
+    
 
 
 

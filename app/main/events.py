@@ -63,6 +63,7 @@ def ready_change(message):
     # we need to check if all players are ready, and we can start the game.
     if ready and game.everyone_ready():
         game.started = True
+        game.reset_ready()
         emit('game_start', {},room=room)
         pass
 
