@@ -19,7 +19,7 @@ from ..game import Game
         3. Quest Picking Phase (leader chooses a quest)
         4. Quest Voting Phase (everyone votes on quest)
         5. Quest P/F Phase (people on quest choose to pass or fail)
-        6. End of Game Voting Phase for assassin (somtimes)
+        6. End of Game Voting Phase for assassin (sometimes)
         7. End of Game Screen.
 
 
@@ -27,7 +27,6 @@ from ..game import Game
         Name
         Team (evil/good)
         Number (ie number available)
-        Knowledge -> what other roles can they see.
 """
 
 
@@ -41,6 +40,7 @@ class Avalon(Game):
         # balance of good,bad for <key> num players
         self.team_balance = {
             2: [1, 1],
+
             5: [3, 2],
             6: [4, 2],
             7: [4, 3],
@@ -156,8 +156,10 @@ def v1_finish(message):
     game.setup_game(roles)
     games_db.save_game(game)
 
+    player_dict = {k : v.name for k, v in game.players.items()}
+
     # emit the move to view 2
-    emit('v2_night', {"assigned_roles" : game.assigned_roles}, room=room)
+    emit('v2_night', {"assigned_roles" : game.assigned_roles, "all_roles":game.roles, "players" : player_dict}, room=room)
 
 
 
@@ -165,6 +167,8 @@ def v1_finish(message):
 from flask import session
 @avalon_bp.route('/game/avalon/<room_id>',  methods=['GET', 'POST'])
 def game_room(room_id):
+    # TODO: Check if game exists. If not, redirect to index.
+
     if "player_id" not in session:
         session['player_id'] = str(uuid.uuid4())
     

@@ -11,12 +11,12 @@ roles = {
         "Number": 1
     },
     "Percival" : {
-        "Name": "Perical",
+        "Name": "Percival",
         "Team": "Good",
         "Number": 1
     },
-    "Loyal Servant of Aurthur" : {
-        "Name": "Loyal Servant of Aurthur",
+    "Loyal Servant of Arthur" : {
+        "Name": "Loyal Servant of Arthur",
         "Team": "Good",
         "Number": 4
     },
