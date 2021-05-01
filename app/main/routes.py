@@ -9,25 +9,20 @@ from flask_socketio import emit
 from . import main, games_db
 from .forms import LoginForm, NameForm
 from ..games import Player, Game
-from ..games import Avalon, avalon_bp as avalon
+from ..games import Avalon, Hitler
 
-# Key: name, value: URL-base
-games_dict = {
-    "Avalon": "avalon",
-    "Werewords": "werewords",
-}
-inv_games_dict = {v: k for k, v in games_dict.items()}
+games_list = (("avalon", Avalon), ("hitler", Hitler))
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
     # Game is chosen, process button press
     if request.method == 'POST':
-        selected_game = [x for x in games_dict.keys() if x in request.form][0]
-        return redirect(url_for('.game_home', game_name=games_dict[selected_game]))
+        selected_game = next(x[0] for x in games_list if x[1].game_name in request.form)
+        return redirect(url_for('.game_home', game_name=selected_game))
 
     # Just get the webpage for list of games
-    return render_template("index.html", games_list=games_dict.keys())
+    return render_template("index.html", games_list=[x[1].game_name for x in games_list])
 
 
 @main.route('/game/<game_name>/', methods=['GET', 'POST'])
@@ -60,7 +55,7 @@ def game_home(game_name):
                 session['room'] = generate_room_id()
             
             # call constructor
-            game = eval(inv_games_dict[game_name])(session['room'])
+            game = next(x[1] for x in games_list if x[0] == game_name)(session['room'])
             games_db.save_game(game)
             return redirect(url_for(game_name+'.game_room', room_id=session['room']))
             

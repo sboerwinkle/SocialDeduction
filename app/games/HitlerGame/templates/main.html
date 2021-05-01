@@ -1,0 +1,26 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
+    
+    <!-- Load the avalon scripts -->
+    {% block javascript %}
+    <script type="text/javascript">
+        {% include "js/main.js" %}
+    </script>
+    {% endblock %}
+
+</head>
+
+<h1>{{ game_info["game_name"] }}: {{ game_info["room_id"] }}</h1>
+<h4>{{ game_info["player_name"] }}</h2>
+
+{% include "components/lobby.html" %}
+<br>
+
+<br>
+<br>
+{% include "components/chat.html" %}
+</html>

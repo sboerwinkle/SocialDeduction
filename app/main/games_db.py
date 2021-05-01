@@ -1,21 +1,10 @@
-import pickle
-import redis
 import os
 
+impl = os.environ.get('SOCIAL_CACHE', 'redis')
 
-
-# redis database stuff
-db = redis.Redis("localhost")
-REDIS_TTL_S = 60*10 if os.environ.get('FLASK_DEV', False) else 60*60*12
-
-
-def get_game(room_id):
-    gm = db.get(room_id)
-    if gm:
-        return pickle.loads(gm)
-    else:
-        return None
-
-
-def save_game(game):
-    db.setex(game.room_id, REDIS_TTL_S, pickle.dumps(game))
+if impl == 'redis':
+    from .db_impl.redis import get_game, save_game
+elif impl == 'mem':
+    from .db_impl.mem import get_game, save_game
+else:
+    raise ValueError('env var "SOCIAL_CACHE" may only have values "redis" or "mem", not "%s"' % impl)

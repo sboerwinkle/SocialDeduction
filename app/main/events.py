@@ -2,7 +2,7 @@ from flask import session
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio
 
-from ..games import Player, Game, Avalon
+from ..games import Player, Game
 from . import games_db
 
 
@@ -81,4 +81,6 @@ def text(message):
     The message is sent to all people in the room."""
     room = message["room"]
     player = message["player_name"]
-    emit('message', {'msg': player + ': ' + message['msg']}, room=room)
+    game = games_db.get_game(room)
+    game.process_message(message["player_name"], message["msg"])
+    games_db.save_game(game)

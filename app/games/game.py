@@ -1,4 +1,5 @@
 import sys
+from flask_socketio import emit
 
 class Player():
 
@@ -33,10 +34,12 @@ class Game():
         if self.player_count == 0:
             self.host_player = player_id
         if player_id in self.players.keys():
-            return
+            return None
         
         self.player_count += 1
-        self.players[player_id] = Player(player_id, player_name, ready)
+        new_player = Player(player_id, player_name, ready)
+        self.players[player_id] = new_player
+        return new_player
 
     def remove_player(self, player_id, player_name):
         if self.player_count == 0:
@@ -70,6 +73,6 @@ class Game():
     def reset_ready(self):
         for player in self.players.values():
             player.ready = False
-    
-    def game_name(self):
-        raise NotImplementedError
+
+    def process_message(self, player_name, msg):
+        emit('message', {'msg': player_name + ': ' + msg}, room=self.room_id)

@@ -22,5 +22,8 @@ def create_app(debug=False):
     from .games.AvalonGame import avalon_bp
     app.register_blueprint(avalon_bp)
 
+    from .games.HitlerGame import hitler_bp
+    app.register_blueprint(hitler_bp)
+
     socketio.init_app(app)
     return app

@@ -31,6 +31,7 @@ from ..game import Game
 
 
 class Avalon(Game):
+    game_name = "Avalon"
 
     def __init__(self, room_id):
         min_players = 2 # currently at 2 just for testing. Real min is 5
@@ -117,9 +118,6 @@ class Avalon(Game):
         leader_int = random.randint(0, self.player_count-1)
         self.leader = self.player_order[leader_int]
         # self.vote_tracker[self.vote_tracker['round']].append()
-
-    def game_name(self):
-        return "Avalon"
 
 
 # socketIO events specific to avalon

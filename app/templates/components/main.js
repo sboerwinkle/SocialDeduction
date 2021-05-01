@@ -33,7 +33,8 @@ var list = function (players, show_ready) {
 }
 
 $(document).ready(function () {
-    socket = io.connect('http://localhost:5000');
+    let socket_url = location.protocol + "//" + location.host;
+    socket = io.connect(socket_url);
     socket.on('connect', function () {
         socket.emit('joined', { "room": room_id, "player_id": player_id, "player_name": player_name });
     });
@@ -48,11 +49,6 @@ $(document).ready(function () {
             $('#chat').val($('#chat').val() + '<' + data.change.player + ' has left the room.>\n');
         }
 
-        // ready change
-        if (data.type == "ready") {
-            // $('#chat').val($('#chat').val() + '<' + data.change.player + ' has changed ready state>\n');
-        }
-
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
 
         // update list of players
@@ -62,6 +58,7 @@ $(document).ready(function () {
     });
 
     socket.on('message', function (data) {
+        if (data.targets && data.targets.indexOf(player_name) == -1) return;
         $('#chat').val($('#chat').val() + data.msg + '\n');
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
     });
