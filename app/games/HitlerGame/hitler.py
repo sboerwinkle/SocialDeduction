@@ -10,29 +10,38 @@ from ...main import games_db
 from ..boardGame import BoardGame
 
 help_text = """Available commands:
- - /show [who] [what]
-        Reveal a value. [who] may be a player prefix, or '_'/'the' for the table.
- - /set [who] [what] [value]
-        Publicly set a value
- - /peek [who] [what]
-        Privately check a value. Others can see you peeking!
- - /poke [who] [what] [value]
-        Privately set a value. Others can see you poking!
- - /draw [num] [who] [what] [who] [what]
-        Move a number of cards from the top of one deck to another
- - /ls
-        List non-empty game objects
- - /shuffle [who] [what]
-        Shuffles a deck
+   /ls
+List non-empty game objects
+
+=== Read / Write ===
+   /show [who] [what]
+Reveal a value. [who] may be a player prefix, or '_'/'the' for the table.
+   /set [who] [what] [value]
+Publicly set a value
+   /peek [who] [what]
+Privately check a value. Others can see you peeking!
+   /poke [who] [what] [value]
+Privately set a value. Others can see you poking!
+
+=== Deck Manipulation ===
+   /draw [num] [who] [what] [who] [what]
+Move a number of cards from the top of one deck to another
+   /shuffle [who] [what]
+Shuffles a deck
+
 === Secret Hitler stuff ===
- - /showvote
-        Reveal and clear each player's 'vote' (vote with '/poke my vote Yes/No'!)
- - /discard [x]
-        Discard the specified card (1-3) from the current 'policies'
- - /reshuffle
-        Shuffle the 'discards' into the 'deck'
- - /setup
-        Sets up the game for the current number of connected players
+   /setup
+Sets up the game for the current number of connected players
+   /vote [vote]
+Set your vote. Votes aren't anonymous, but aren't revealed until everyone's voted.
+   /showvote
+Reveal and clear each player's 'vote'. Run automatically if everyone votes.
+   /discard [x]
+Discard the specified card (1-3) from the current 'policies'
+   /enact
+If there is one policy left, reveals it and pulls from the appropriate policy track.
+   /reshuffle
+Shuffle the 'discards' into the 'deck'
 """
 
 class Hitler(BoardGame):
@@ -55,12 +64,6 @@ class Hitler(BoardGame):
 
         if command == "help":
             self.write(help_text, lambda x: x.name == player_name)
-        elif command == "job1":
-            self.input(player_name, "/draw 3 the deck the policies")
-        elif command == "job2":
-            self.input(player_name, "/peek the policies")
-        elif command == "job3":
-            self.input(player_name, "/move 1 the policies the trash")
         elif command in ("set", "show", "peek", "poke"):
             (who, msg) = self.first_word(msg)
             (what, msg) = self.first_word(msg)
@@ -96,7 +99,7 @@ class Hitler(BoardGame):
             d2 = self.get_deck(who2, what2)
             self.set_deck(who2, what2, d1[:num] + d2)
             self.set_deck(who1, what1, d1[num:])
-            self.write(f"{player_name} draw {num} cards from {who1_str} {what1} to {who2_str} {what2}")
+            self.write(f"{player_name} drew {num} cards from {who1_str} {what1} to {who2_str} {what2}")
         elif command == "shuffle":
             (who, msg) = self.first_word(msg)
             (what, msg) = self.first_word(msg)
@@ -108,8 +111,11 @@ class Hitler(BoardGame):
             self.set_deck(who, what, d)
         elif command == "showvote":
             for p in self.players.values():
-                self.write(f"{p.name} voted '{p.objs.get('vote', '')}'")
-                del p.objs['vote']
+                if 'vote' in p.objs:
+                    self.write(f"{p.name} voted '{p.objs['vote']}'")
+                    del p.objs['vote']
+                else:
+                    self.write(f"{p.name} did not vote.")
         elif command == "discard":
             (num, msg) = self.first_word(msg)
             num = int(num) - 1
@@ -128,6 +134,29 @@ class Hitler(BoardGame):
             self.write(f"{player_name} reshuffled the deck+discards")
         elif command == "vote":
             self.set_value(player_name, 1, self.find_player(player_name), 'vote', msg)
+            for p in self.players.values():
+                if not ('vote' in p.objs):
+                    return
+            self.input(player_name, "/showvote")
+        elif command == "enact":
+            tokens = self.get_deck(self, 'policies')
+            if len(tokens) != 1:
+                raise Exception(f"Can only /enact with 1 card in the 'policies', currently there are {len(tokens)}")
+            if tokens[0] == "F":
+                deck = "fascism"
+                adjective = "Fascist"
+            else:
+                deck = "liberalism"
+                adjective = "Liberal"
+            policies = self.get_deck(self, deck)
+            if len(policies) == 0:
+                raise Exception("No policies of that type left to enact")
+            policy = policies[0]
+            self.set_deck(self, deck, policies[1:])
+            del self.objs['policies']
+            self.write(f"* {player_name} enacted {adjective} policy '{policy}'! Remaining policies:")
+            self.write("* " + self.objs.get('liberalism', ''))
+            self.write("* " + self.objs.get('fascism', ''))
         elif command == "setup":
             self.write(f"{player_name} set up everything...")
             self.objs = {}
@@ -137,6 +166,8 @@ class Hitler(BoardGame):
             random.shuffle(deck)
             self.set_deck(self, 'deck', deck)
             players = len(self.players)
+            if players == 1:
+                players = 5 # For debugging
             if players < 5 or players > 10:
                 self.write(f"Core rules only support 5-10 players! Roles, parties, and the policy tracks are left unset.")
                 return
@@ -147,7 +178,7 @@ class Hitler(BoardGame):
             party_membership = []
             hitler = "No one???"
             player_list = [y for y in self.players.values()]
-            for i in range(players):
+            for i in range(len(player_list)):
                 p = player_list[i]
                 role = roles[i]
                 p.objs['role'] = role
@@ -163,13 +194,13 @@ class Hitler(BoardGame):
                 self.write("You do not know who the other fascist is.", lambda x: x.name == hitler)
             self.write(f"Fascists are: {party_membership}. Hitler is: {hitler}", lambda x: x.objs['role'] == 'Fascist')
             if players > 8:
-                facism = ['check','check','spec. elect']
+                fascism = ['check','check','spec. elect']
             elif players > 6:
-                facism = ['wait','check','spec. elect']
+                fascism = ['wait','check','spec. elect']
             else:
-                facism = ['wait','wait','peek']
-            facism += ['kill','kill','Facist Victory!']
-            self.set_deck(self, 'facism', facism)
+                fascism = ['wait','wait','peek']
+            fascism += ['kill','kill','Fascist Victory!']
+            self.set_deck(self, 'fascism', fascism)
             self.set_deck(self, 'liberalism', ['wait', 'wait', 'wait', 'wait', 'Liberal Victory!'])
         else:
             raise Exception(f"Unknown command '/{command}', try '/help'")

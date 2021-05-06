@@ -32,6 +32,14 @@ var list = function (players, show_ready) {
     }
 }
 
+function send_message(text) {
+    if (socket) {
+        socket.emit('text', { msg: text, "room": room_id, "player_id": player_id, "player_name": player_name });
+    } else {
+        console.log("Not sending, socket not initialized")
+    }
+}
+
 $(document).ready(function () {
     let socket_url = location.protocol + "//" + location.host;
     socket = io.connect(socket_url);
@@ -64,12 +72,12 @@ $(document).ready(function () {
     });
 
     // on document changes.
-    $('#text').keypress(function (e) {
+    let text_field = $('#text')
+    text_field.keypress(function (e) {
         var code = e.keyCode || e.which;
         if (code == 13) {
-            text = $('#text').val();
-            $('#text').val('');
-            socket.emit('text', { msg: text, "room": room_id, "player_id": player_id, "player_name": player_name });
+            send_message(text_field.val());
+            text_field.val('');
         }
     });
 

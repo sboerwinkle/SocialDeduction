@@ -5,7 +5,6 @@
     <!-- <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script> -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
     
-    <!-- Load the avalon scripts -->
     {% block javascript %}
     <script type="text/javascript">
         {% include "js/main.js" %}
@@ -19,8 +18,17 @@
 
 {% include "components/lobby.html" %}
 <br>
-
-<br>
 <br>
 {% include "components/chat.html" %}
+<br>
+<br>
+<button type="button" onclick="send_message('/draw 3 the deck the policies')" style="margin-right: 20px">
+	Draw Policies
+</button>
+<button type="button" onclick="send_message('/peek the policies')" style="margin-right: 20px">
+	Peek Policies
+</button>
+<button type="button" onclick="send_message('/enact')" style="margin-right: 20px">
+	Enact Policy
+</button>
 </html>
